@@ -3,6 +3,8 @@ from functions import (
     get_indices,
     get_songs_raw_data,
     get_song_tuple_list,
+    remove_duplicates,
+    reindex,
     get_wordcloud
 )
 from classes import Songs
@@ -16,9 +18,11 @@ raw_lines = read_file_to_get_raw_lines(my_file)
 indices = get_indices(raw_lines)
 song_raw_list = get_songs_raw_data(indices, raw_lines)
 song_tuple_list = get_song_tuple_list(song_raw_list)
+unique_songs = remove_duplicates(song_tuple_list)
+reindexed_songs = reindex(unique_songs)
 
 # songs is the list of tuples of songs from the original file
-songs = Songs(song_data=song_tuple_list)
+songs = Songs(song_data=reindexed_songs)
 # print all the song objects
 for song in songs.song_objects:
     print(song)
