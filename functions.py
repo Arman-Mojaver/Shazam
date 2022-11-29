@@ -1,10 +1,10 @@
 # This is a function which read the content of a file
-# and transfer it into a list of each line in the file
+# and transfer it into a list of every line in the file
 def read_file_to_get_raw_lines(filename):
-    with open(file=filename, mode='r', encoding='utf-8') as f1:
+    with open(file=filename, mode='r', encoding='utf-8') as f:
         # Create a list named raw_lines to store the lines without space or line break surrounding:
         raw_lines = []
-        for line in f1.readlines():
+        for line in f.readlines():
             # Remove the surrounding space and line break of each line in file1
             strip_string = line.strip()
             if strip_string:
@@ -13,6 +13,9 @@ def read_file_to_get_raw_lines(filename):
     return raw_lines
 
 
+# From the function: read_file_to_get_raw_lines, we get the list of every line in the file.
+# We need to remove the unnecessary lines, and only keep the index, song titles and artists.
+# In order to do that, firstly we need to get all the song index numbers and put them into a list.
 # This is a function that create a list called index_list to store all the index numbers in raw_data:
 def get_indices(raw_lines):
     index_list = []
@@ -23,7 +26,9 @@ def get_indices(raw_lines):
     return index_list
 
 
-# This is the function that generate a list of all index, song names and artists from the indices and raw_lines
+# From the function:get_indices, we get the list of index numbers from the file.
+# Based on this, we can create a function named get_songs_raw_data to
+# generate a list of all index, song names and artists from the indices and raw_lines.
 def get_songs_raw_data(indices, raw_lines):
     # Get the first index and last index value:
     first_index_value = indices[0]
@@ -38,8 +43,9 @@ def get_songs_raw_data(indices, raw_lines):
     return song_raw_list
 
 
-# This is the function to get a list of tuple of song from the song_raw_list
-# In this case, we spilt the list in every step 3:
+# From the function:get_songs_raw_data, we get a list of index number, song title and artist.
+# Based on this, we can create a function named get_song_tuple_list to put the index, song title and artist
+# of every song into a tuple and then put all the tuples into a list.
 def get_song_tuple_list(song_raw_list):
     song_tuple_list = [tuple(song_raw_list[i:i+3]) for i in range(0, len(song_raw_list), 3)]
     return song_tuple_list
@@ -59,3 +65,4 @@ def get_wordcloud(text):
     ).generate(text)
 
     return wordcloud
+
