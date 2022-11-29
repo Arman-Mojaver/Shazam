@@ -1,3 +1,5 @@
+from wordcloud import WordCloud
+
 # This is a function which read the content of a file
 # and transfer it into a list of every line in the file
 def read_file_to_get_raw_lines(filename):
@@ -47,11 +49,23 @@ def get_songs_raw_data(indices, raw_lines):
 # Based on this, we can create a function named get_song_tuple_list to put the index, song title and artist
 # of every song into a tuple and then put all the tuples into a list.
 def get_song_tuple_list(song_raw_list):
-    song_tuple_list = [tuple(song_raw_list[i:i+3]) for i in range(0, len(song_raw_list), 3)]
-    return song_tuple_list
+    return [tuple(song_raw_list[i:i+3]) for i in range(0, len(song_raw_list), 3)]
 
 
-from wordcloud import WordCloud
+# From the function: get_song_tuple_list, we get the list of tuple of song.
+# But it may have duplicates in this list, so we need to remove duplicates.
+# Function: remove_duplicates is the function to get the unique tuple of the song title and artist
+def remove_duplicates(song_tuple_list):
+    return list(set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in song_tuple_list]))
+
+
+# From the function: remove_duplicates, we get the list of unique tuple of the song title and artist
+# Based on this, we create a function named reindex to add the index into every tuple
+# In this function, we also sort the songs by artist name.
+def reindex(unique_songs):
+    sorted_songs = sorted(unique_songs, key=lambda unique_songs:unique_songs[1])
+    return [(index, song[0], song[1]) for index, song in enumerate(sorted_songs, 1)]
+
 
 # This is the function to generate the image of word cloud from the given text
 def get_wordcloud(text):
@@ -65,4 +79,3 @@ def get_wordcloud(text):
     ).generate(text)
 
     return wordcloud
-
