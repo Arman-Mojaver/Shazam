@@ -1,7 +1,0 @@
-Once the garbage text has been remove, and a list of all indexes, songs and artists is available, separate each song from each other. Example:
-
-list_of_everything = ['1', artist_1, song_1, '2', artist_2, song_2, '3', artist_3, song_3, ....] --> 
-list_of_songs = [('1', artist_1, song_1), ('2', artist_2, song_2), ('3', artist_3, song_3), ....]
-
-Create a class named Song, with 3 attributes: index, artist, song. Create a __repr__ method so everything is printed when the object is printed. 
-Create a list of Song objects
