@@ -1,0 +1,7 @@
+It is not good practice to write inputs as variables in python scripts.
+It is a better practice to create a CLI (Command Line Interface) that
+accepts the inputs when executing the command. Use the 'click' module to create a CLI from the app.
+
+References:
+https://click.palletsprojects.com/en/8.1.x/
+https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df
