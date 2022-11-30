@@ -55,7 +55,7 @@ class DataHandler:
             # Create a list named raw_lines to store the lines without space or line break surrounding:
             raw_lines = []
             for line in f.readlines():
-                # Remove the surrounding space and line break of each line in file1
+                # Remove the surrounding space and line break of each line in f
                 strip_string = line.strip()
                 if strip_string:
                     raw_lines.append(strip_string)
@@ -67,12 +67,7 @@ class DataHandler:
     # In order to do that, firstly we need to get all the song index numbers and put them into a list.
     # This is a function that create a list called index_list to store all the index numbers in raw_data:
     def get_indices(self):
-        index_list = []
-        for index_num in self.raw_lines:
-            if index_num.isdigit():
-                index_list.append(index_num)
-
-        return index_list
+        return [index_num for index_num in self.raw_lines if index_num.isdigit()]
 
     # From the function:get_indices, we get the list of index numbers from the file.
     # Based on this, we can create a function named get_songs_raw_data to
@@ -91,21 +86,21 @@ class DataHandler:
 
         return song_raw_list
 
-    # From the function:get_songs_raw_data, we get a list of index number, song title and artist.
-    # Based on this, we can create a function named get_song_tuple_list to put the index, song title and artist
+    # From the method get_songs_raw_data(), we get a list of index number, song title and artist.
+    # Based on this, we can create a method named get_song_tuple_list() to put the index, song title and artist
     # of every song into a tuple and then put all the tuples into a list.
     def get_song_tuple_list(self):
         return [tuple(self.song_raw_list[i:i + 3]) for i in range(0, len(self.song_raw_list), 3)]
 
-    # From the function: get_song_tuple_list, we get the list of tuple of song.
+    # From the method get_song_tuple_list(), we get the list of tuple of song.
     # But it may have duplicates in this list, so we need to remove duplicates.
-    # Function: remove_duplicates is the function to get the unique tuple of the song title and artist
+    # method remove_duplicates() is the function to get the unique tuple of the song title and artist
     def remove_duplicates(self):
         return list(set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in self.song_tuple_list]))
 
-    # From the function: remove_duplicates, we get the list of unique tuple of the song title and artist
+    # From the method remove_duplicates(), we get the list of unique tuple of the song title and artist
     # Based on this, we create a function named reindex to add the index into every tuple
-    # In this function, we also sort the songs by artist name.
+    # In this method, we also sort the songs by artist name.
     def reindex(self):
         sorted_songs = sorted(self.unique_songs, key=lambda unique_songs: unique_songs[1])
         return [(index, song[0], song[1]) for index, song in enumerate(sorted_songs, 1)]

@@ -1,5 +1,5 @@
 from classes import Songs, DataHandler
-#import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # Open the file which is named shazam.txt and read the content of this file
 my_file = 'shazam.txt'
@@ -13,10 +13,10 @@ songs = Songs(song_data=data_handler.reindexed_songs)
 songs.print()
 
 # We create the word cloud of the artists
-#text = ' '.join(songs.artists)
-#wordcloud_1 = get_wordcloud(text)
-#plt.imshow(wordcloud_1)
-#plt.axis('off')
-#plt.show()
+# text = ' '.join(songs.artists)
+# wordcloud_1 = get_wordcloud(text)
+# plt.imshow(wordcloud_1)
+# plt.axis('off')
+# plt.show()
 
-#wordcloud_1.to_file('shazam_artist_wordcloud.png')
+# wordcloud_1.to_file('shazam_artist_wordcloud.png')
