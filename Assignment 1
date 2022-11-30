@@ -1,4 +1,0 @@
-Create a Python script that parses (reads) the file named 'Shazam.txt'. 
-The relevant content of the file is: index, song name, artist name.
-The script should remove the garbage text (unnecessary text) from before and after the relevant content of the file.
-Use Object Orient Programming (OOP). 

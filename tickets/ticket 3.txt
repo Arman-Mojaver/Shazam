@@ -1,0 +1,9 @@
+Reading text files is fine, but Shazam has an option of downloading a CSV from the account with a list of all the songs.
+Besides the songs, it includes other data that can be included in our app's model, such as date, or id.
+Make it possible to load the songs from a CSV instead of .txt, and add an option in the CLI that allows to choose
+between one or the other. Use CSV as default if the option is not specified when using the command.
+A sample of the data has been attached named 'ticket 3 attachment.csv', use it for development and testing.
+Use the 'csv' module, and not the 'pandas' module for this
+Some references on the 'csv' module:
+https://realpython.com/python-csv/
+https://www.programiz.com/python-programming/csv
