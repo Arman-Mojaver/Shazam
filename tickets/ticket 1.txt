@@ -1,0 +1,10 @@
+The Shazam file 'shazam.txt' is constantly being updated with new songs,
+and the purpose of the app is to eventually download the songs,
+it would be pointless to download all the songs every time, since we would already have most of them.
+
+If it is the first time the songs are being downloaded, then all the songs in 'shazam.txt' should be downloaded.
+And after that first round of downloads,
+the app should create a json file named 'old_songs.json' with a list of the songs that just have been downloaded.
+
+When the shazam file 'shazam.txt' gets updated with a few extra songs,
+the app should compare the songs of the file with the songs in 'old_songs.json', and only download the new songs.
