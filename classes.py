@@ -1,14 +1,16 @@
+import json
+from os.path import exists as file_exists
+
 # Create a class named Song, with 3 attributes: index, song_title, artist.
 # Each song from the file is one of the objects of the song class
 class Song:
 
-    def __init__(self, index, song_title, artist):
-        self.index = index
+    def __init__(self, song_title, artist):
         self.song_title = song_title
         self.artist = artist
 
     def __repr__(self):
-        return f"Song<index: {self.index}, song title: {self.song_title}, artist: {self.artist}>"
+        return f"Song<song title: {self.song_title}, artist: {self.artist}>"
 
 
 # Create a class named Songs that handle the list of song objects
@@ -26,7 +28,7 @@ class Songs:
     # This method creates a list of objects of type Song.
     # We use Song class here so that we can convert the tuples into Song objects
     def get_song_objects(self):
-        return [Song(song[0], song[1], song[2]) for song in self.song_data]
+        return [Song(song[0], song[1]) for song in self.song_data]
 
     def get_artists(self):
         return [song.artist for song in self.song_objects]
@@ -47,9 +49,9 @@ class DataHandler:
         self.song_raw_list = self.get_songs_raw_data()
         self.song_tuple_list = self.get_song_tuple_list()
         self.unique_songs = self.remove_duplicates()
-        self.reindexed_songs = self.reindex()
+        self.json_songs = self.filter_songs()
 
-    # This is a function which read a file and transfer it into a list of every line in the file
+    # This is a method which read a file and transfer it into a list of every line in the file
     def read_file_to_get_raw_lines(self):
         with open(file=self.file, mode='r', encoding='utf-8') as f:
             # Create a list named raw_lines to store the lines without space or line break surrounding:
@@ -62,14 +64,14 @@ class DataHandler:
 
         return raw_lines
 
-    # From the function: read_file_to_get_raw_lines, we get the list of every line in the file.
+    # From the method: read_file_to_get_raw_lines(), we get the list of every line in the file.
     # We need to remove the unnecessary lines, and only keep the index, song titles and artists.
     # In order to do that, firstly we need to get all the song index numbers and put them into a list.
     # This is a function that create a list called index_list to store all the index numbers in raw_data:
     def get_indices(self):
         return [index_num for index_num in self.raw_lines if index_num.isdigit()]
 
-    # From the function:get_indices, we get the list of index numbers from the file.
+    # From the method:get_indices(), we get the list of index numbers from the file.
     # Based on this, we can create a function named get_songs_raw_data to
     # generate a list of all index, song names and artists from the indices and raw_lines.
     def get_songs_raw_data(self):
@@ -98,14 +100,32 @@ class DataHandler:
     def remove_duplicates(self):
         return list(set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in self.song_tuple_list]))
 
-    # From the method remove_duplicates(), we get the list of unique tuple of the song title and artist
-    # Based on this, we create a function named reindex to add the index into every tuple
-    # In this method, we also sort the songs by artist name.
-    def reindex(self):
-        sorted_songs = sorted(self.unique_songs, key=lambda unique_songs: unique_songs[1])
-        return [(index, song[0], song[1]) for index, song in enumerate(sorted_songs, 1)]
-
     def print(self):
-        for song in self.reindexed_songs:
+        for song in self.unique_songs:
             print(song)
+
+    def filter_songs(self):
+        song_list = self.unique_songs
+        # Transfer the list into json format
+        json_songs = json.dumps(song_list, ensure_ascii=False, indent=2)
+        # If the songs in the file are being saved for the first time,
+        # we create a json file named 'old_songs.json' which contains the songs that just have been saved.
+        if not file_exists('old_songs.json'):
+            print('The songs are being downloaded for the first time, and old_songs.json is created!')
+            with open(file='old_songs.json', mode='w', encoding='utf-8') as f1:
+                f1.write(json_songs)
+                f1.close()
+        # When the file gets updated with a few extra songs,the app would compare
+        # the songs of the file with the songs in 'old_songs.json', and only download the new songs.
+        else:
+            with open(file='old_songs.json', mode='r', encoding='utf-8') as f2:
+                old_songs_set = set([tuple(song) for song in json.load(f2)])
+                songs_in_txt_set = set(song_list)
+                new_songs = songs_in_txt_set - old_songs_set
+                return new_songs
+
+
+
+
+
 
