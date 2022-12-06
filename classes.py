@@ -104,25 +104,36 @@ class DataHandler:
         for song in self.unique_songs:
             print(song)
 
-    def filter_songs(self):
+    # We save the unique_songs into a json file
+    def save_json(self):
         song_list = self.unique_songs
         # Transfer the list into json format
         json_songs = json.dumps(song_list, ensure_ascii=False, indent=2)
-        # If the songs in the file are being saved for the first time,
-        # we create a json file named 'old_songs.json' which contains the songs that just have been saved.
+        with open(file='old_songs.json', mode='w', encoding='utf-8') as f1:
+            f1.write(json_songs)
+            f1.close()
+
+    # We load the content of the songs in 'old_songs.json'
+    def load_json(self):
+        with open(file='old_songs.json', mode='r', encoding='utf-8') as f2:
+            return set(tuple(song) for song in json.load(f2))
+
+    def filter_songs(self):
+        song_list = self.unique_songs
+        #  If the songs in the file are being saved for the first time,
+        #  we create a json file named 'old_songs.json' which contains the songs that just have been saved.
         if not file_exists('old_songs.json'):
-            print('The songs are being downloaded for the first time, and old_songs.json is created!')
-            with open(file='old_songs.json', mode='w', encoding='utf-8') as f1:
-                f1.write(json_songs)
-                f1.close()
-        # When the file gets updated with a few extra songs,the app would compare
-        # the songs of the file with the songs in 'old_songs.json', and only download the new songs.
+            print('The songs are being loaded for the first time, and old_songs.json is created!')
+            self.save_json()
+        # When the file gets updated with a few extra songs,we return the new songs.
         else:
-            with open(file='old_songs.json', mode='r', encoding='utf-8') as f2:
-                old_songs_set = set([tuple(song) for song in json.load(f2)])
-                songs_in_txt_set = set(song_list)
-                new_songs = songs_in_txt_set - old_songs_set
+            new_songs = set(song_list) - self.load_json()
+            if new_songs:
+                print('New songs which need to be downloaded: ')
                 return new_songs
+            else:
+                print('There is no extra new song to be downloaded.')
+
 
 
 
