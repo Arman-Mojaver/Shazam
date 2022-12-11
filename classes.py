@@ -42,18 +42,23 @@ class Songs:
 
 # Create a class named DataHandler that handle the data from the file and remove duplicates
 class DataHandler:
-    def __init__(self, file):
-        self.file = file
+
+    # Class variables belong to the class
+    # When objects are created from the class, they also have the class variables.
+    SHAZAM_FILE_NAME = 'shazam2.txt'
+    OLD_SONGS_FILE_NAME = 'old_songs.json'
+
+    def __init__(self):
         self.raw_lines = self.read_file_to_get_raw_lines()
         self.indices = self.get_indices()
         self.song_raw_list = self.get_songs_raw_data()
-        self.song_tuple_list = self.get_song_tuple_list()
-        self.unique_songs = self.remove_duplicates()
-        self.json_songs = self.filter_songs()
+        self.songs = self.get_songs()
+        self.remove_duplicates_and_indices()
+        self.filter_old_songs()
 
     # This is a method which read a file and transfer it into a list of every line in the file
     def read_file_to_get_raw_lines(self):
-        with open(file=self.file, mode='r', encoding='utf-8') as f:
+        with open(file=self.SHAZAM_FILE_NAME, mode='r', encoding='utf-8') as f:
             # Create a list named raw_lines to store the lines without space or line break surrounding:
             raw_lines = []
             for line in f.readlines():
@@ -91,48 +96,48 @@ class DataHandler:
     # From the method get_songs_raw_data(), we get a list of index number, song title and artist.
     # Based on this, we can create a method named get_song_tuple_list() to put the index, song title and artist
     # of every song into a tuple and then put all the tuples into a list.
-    def get_song_tuple_list(self):
+    def get_songs(self):
         return [tuple(self.song_raw_list[i:i + 3]) for i in range(0, len(self.song_raw_list), 3)]
 
     # From the method get_song_tuple_list(), we get the list of tuple of song.
     # But it may have duplicates in this list, so we need to remove duplicates.
     # method remove_duplicates() is the function to get the unique tuple of the song title and artist
-    def remove_duplicates(self):
-        return list(set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in self.song_tuple_list]))
+    def remove_duplicates_and_indices(self):
+        self.songs = list(
+            set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in self.songs])
+        )
 
     def print(self):
-        for song in self.unique_songs:
+        for song in self.songs:
             print(song)
 
-    # We save the unique_songs into a json file
+    # We save the songs into a json file
     def save_json(self):
-        song_list = self.unique_songs
-        # Transfer the list into json format
-        json_songs = json.dumps(song_list, ensure_ascii=False, indent=2)
-        with open(file='old_songs.json', mode='w', encoding='utf-8') as f1:
-            f1.write(json_songs)
-            f1.close()
+        with open(file=self.OLD_SONGS_FILE_NAME, mode='w', encoding='utf-8') as f:
+            json.dump(self.songs, f, ensure_ascii=False, indent=2)
 
     # We load the content of the songs in 'old_songs.json'
     def load_json(self):
-        with open(file='old_songs.json', mode='r', encoding='utf-8') as f2:
-            return set(tuple(song) for song in json.load(f2))
+        with open(file=self.OLD_SONGS_FILE_NAME, mode='r', encoding='utf-8') as f:
+            return set(tuple(song) for song in json.load(f))
 
-    def filter_songs(self):
-        song_list = self.unique_songs
+    def filter_old_songs(self):
         #  If the songs in the file are being saved for the first time,
         #  we create a json file named 'old_songs.json' which contains the songs that just have been saved.
-        if not file_exists('old_songs.json'):
+        if not file_exists(self.OLD_SONGS_FILE_NAME):
             print('The songs are being loaded for the first time, and old_songs.json is created!')
             self.save_json()
-        # When the file gets updated with a few extra songs,we return the new songs.
-        else:
-            new_songs = set(song_list) - self.load_json()
-            if new_songs:
-                print('New songs which need to be downloaded: ')
-                return new_songs
-            else:
-                print('There is no extra new song to be downloaded.')
+            # This return statement means "exit the method without doing anything else"
+            # Methods and functions only need to return something if it is going to be used later on in the code
+            return
+
+        self.songs = set(self.songs) - self.load_json()
+        if not self.songs:
+            print('There is no extra new song to be downloaded.')
+            quit()
+
+        print('New songs which need to be downloaded: \n', self.songs)
+
 
 
 
