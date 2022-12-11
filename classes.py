@@ -1,5 +1,5 @@
 import json
-from os.path import exists as file_exists
+import os
 
 # Create a class named Song, with 3 attributes: index, song_title, artist.
 # Each song from the file is one of the objects of the song class
@@ -124,7 +124,7 @@ class DataHandler:
     def filter_old_songs(self):
         #  If the songs in the file are being saved for the first time,
         #  we create a json file named 'old_songs.json' which contains the songs that just have been saved.
-        if not file_exists(self.OLD_SONGS_FILE_NAME):
+        if not os.path.exists(self.OLD_SONGS_FILE_NAME):
             print('The songs are being loaded for the first time, and old_songs.json is created!')
             self.save_json()
             # This return statement means "exit the method without doing anything else"
