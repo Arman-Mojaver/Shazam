@@ -1,17 +1,16 @@
-# Create a class named Song, with 3 attributes: index, song_title, artist.
-# Each song from the file is one of the objects of the song class
+import pandas as pd
+import os
+
 class Song:
 
-    def __init__(self, index, song_title, artist):
-        self.index = index
+    def __init__(self, song_title, artist):
         self.song_title = song_title
         self.artist = artist
 
     def __repr__(self):
-        return f"Song<index: {self.index}, song title: {self.song_title}, artist: {self.artist}>"
+        return f"Song<song title: {self.song_title}, artist: {self.artist}>"
 
 
-# Create a class named Songs that handle the list of song objects
 class Songs:
     def __init__(self, song_data):
         # song_data is the list of tuples of songs
@@ -26,7 +25,7 @@ class Songs:
     # This method creates a list of objects of type Song.
     # We use Song class here so that we can convert the tuples into Song objects
     def get_song_objects(self):
-        return [Song(song[0], song[1], song[2]) for song in self.song_data]
+        return [Song(song[0], song[1]) for song in self.song_data]
 
     def get_artists(self):
         return [song.artist for song in self.song_objects]
@@ -38,20 +37,24 @@ class Songs:
         for song in self.song_objects:
             print(song)
 
-# Create a class named DataHandler that handle the data from the file and remove duplicates
+# Create a class named DataHandler that handle the data from the file and build a data frame
 class DataHandler:
-    def __init__(self, file):
-        self.file = file
+
+    # Class variables belong to the class
+    # When objects are created from the class, they also have the class variables.
+    SHAZAM_FILE_NAME = 'shazam2.txt'
+    OLD_SONGS_FILE_NAME = 'old_songs.json'
+
+    def __init__(self):
         self.raw_lines = self.read_file_to_get_raw_lines()
         self.indices = self.get_indices()
         self.song_raw_list = self.get_songs_raw_data()
-        self.song_tuple_list = self.get_song_tuple_list()
-        self.unique_songs = self.remove_duplicates()
-        self.reindexed_songs = self.reindex()
+        self.songs = self.get_songs()
+        self.df = self.build_dataframe()
+        self.remove_duplicates()
 
-    # This is a function which read a file and transfer it into a list of every line in the file
     def read_file_to_get_raw_lines(self):
-        with open(file=self.file, mode='r', encoding='utf-8') as f:
+        with open(file=self.SHAZAM_FILE_NAME, mode='r', encoding='utf-8') as f:
             # Create a list named raw_lines to store the lines without space or line break surrounding:
             raw_lines = []
             for line in f.readlines():
@@ -62,16 +65,9 @@ class DataHandler:
 
         return raw_lines
 
-    # From the function: read_file_to_get_raw_lines, we get the list of every line in the file.
-    # We need to remove the unnecessary lines, and only keep the index, song titles and artists.
-    # In order to do that, firstly we need to get all the song index numbers and put them into a list.
-    # This is a function that create a list called index_list to store all the index numbers in raw_data:
     def get_indices(self):
         return [index_num for index_num in self.raw_lines if index_num.isdigit()]
 
-    # From the function:get_indices, we get the list of index numbers from the file.
-    # Based on this, we can create a function named get_songs_raw_data to
-    # generate a list of all index, song names and artists from the indices and raw_lines.
     def get_songs_raw_data(self):
         # Get the first index and last index value:
         first_index_value = self.indices[0]
@@ -86,26 +82,50 @@ class DataHandler:
 
         return song_raw_list
 
-    # From the method get_songs_raw_data(), we get a list of index number, song title and artist.
-    # Based on this, we can create a method named get_song_tuple_list() to put the index, song title and artist
-    # of every song into a tuple and then put all the tuples into a list.
-    def get_song_tuple_list(self):
-        return [tuple(self.song_raw_list[i:i + 3]) for i in range(0, len(self.song_raw_list), 3)]
+    def get_songs(self):
+        return [tuple(self.song_raw_list[i:i + 2]) for i in range(1, len(self.song_raw_list), 3)]
 
-    # From the method get_song_tuple_list(), we get the list of tuple of song.
-    # But it may have duplicates in this list, so we need to remove duplicates.
-    # method remove_duplicates() is the function to get the unique tuple of the song title and artist
+    def build_dataframe(self):
+        return pd.DataFrame(self.songs, columns=['Title', 'Artist'])
+
     def remove_duplicates(self):
-        return list(set([(index_title_artist[1], index_title_artist[2]) for index_title_artist in self.song_tuple_list]))
-
-    # From the method remove_duplicates(), we get the list of unique tuple of the song title and artist
-    # Based on this, we create a function named reindex to add the index into every tuple
-    # In this method, we also sort the songs by artist name.
-    def reindex(self):
-        sorted_songs = sorted(self.unique_songs, key=lambda unique_songs: unique_songs[1])
-        return [(index, song[0], song[1]) for index, song in enumerate(sorted_songs, 1)]
+        if self.df.duplicated().any():
+            self.df = self.df.drop_duplicates()
 
     def print(self):
-        for song in self.reindexed_songs:
-            print(song)
+        print(self.df)
+
+    def save_json(self):
+        self.df.to_json(self.OLD_SONGS_FILE_NAME)
+
+    # We load the content of the songs in 'old_songs.json'
+    def load_json(self):
+        return pd.read_json(self.OLD_SONGS_FILE_NAME)
+
+    def filter_old_songs(self):
+        #  If the songs in the file are being saved for the first time,
+        #  we create a json file named 'old_songs.json' which contains the songs that just have been saved.
+        if not os.path.exists(self.OLD_SONGS_FILE_NAME):
+            print('The songs are being loaded for the first time, and old_songs.json is created!')
+            self.save_json()
+            # This return statement means "exit the method without doing anything else"
+            # Methods and functions only need to return something if it is going to be used later on in the code
+            return
+
+        # Load the content of 'old_songs.json' into a dataframe named df2
+        df2 = self.load_json()
+        if self.df.equals(df2):
+            print('There is no extra new song to be downloaded.')
+            quit()
+
+        print('New songs which need to be downloaded:')
+        extra_df = self.df[~self.df.isin(df2)].dropna()
+        print(extra_df)
+
+
+
+
+
+
+
 
