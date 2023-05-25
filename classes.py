@@ -52,6 +52,7 @@ class DataHandler:
         self.songs = self.get_songs()
         self.df = self.build_dataframe()
         self.remove_duplicates()
+        self.filter_old_songs()
 
     def read_file_to_get_raw_lines(self):
         with open(file=self.SHAZAM_FILE_NAME, mode='r', encoding='utf-8') as f:
@@ -93,7 +94,7 @@ class DataHandler:
             self.df = self.df.drop_duplicates()
 
     def print(self):
-        print(self.df)
+        print(self.df.reset_index(drop=True))
 
     def save_json(self):
         self.df.to_json(self.OLD_SONGS_FILE_NAME)
@@ -106,21 +107,26 @@ class DataHandler:
         #  If the songs in the file are being saved for the first time,
         #  we create a json file named 'old_songs.json' which contains the songs that just have been saved.
         if not os.path.exists(self.OLD_SONGS_FILE_NAME):
-            print('The songs are being loaded for the first time, and old_songs.json is created!')
+            print('The songs are being loaded for the first time to old_songs.json!')
             self.save_json()
             # This return statement means "exit the method without doing anything else"
             # Methods and functions only need to return something if it is going to be used later on in the code
             return
 
         # Load the content of 'old_songs.json' into a dataframe named df2
-        df2 = self.load_json()
-        if self.df.equals(df2):
+        loaded_df = self.load_json()
+        print('Totally {} songs are downloaded!'.format(len(loaded_df)))
+        if self.df.equals(loaded_df):
             print('There is no extra new song to be downloaded.')
             quit()
 
-        print('New songs which need to be downloaded:')
-        extra_df = self.df[~self.df.isin(df2)].dropna()
-        print(extra_df)
+        self.extra_df = self.df[~self.df.isin(loaded_df)].dropna()
+        print('Number of new songs to be downloaded: {}'.format(len(self.extra_df)))
+        print('List of new songs:')
+        print(self.extra_df.to_string(index=False))
+
+
+
 
 
 
